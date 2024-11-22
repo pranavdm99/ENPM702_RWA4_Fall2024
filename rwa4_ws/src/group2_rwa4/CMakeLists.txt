@@ -10,18 +10,20 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
+find_package(tf2 REQUIRED)
 
 include_directories(include/group2_rwa4)
 add_executable(bot_sequence src/main.cpp src/bot_sequence.cpp)
 target_include_directories(bot_sequence PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
-target_compile_features(bot_sequence PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
+target_compile_features(bot_sequence PUBLIC c_std_99 cxx_std_17) # Require C99 and C++17
 ament_target_dependencies(
   bot_sequence
-  "rclcpp"
-  "geometry_msgs"
-  "nav_msgs"
+  rclcpp
+  geometry_msgs
+  nav_msgs
+  tf2
 )
 
 install(TARGETS bot_sequence

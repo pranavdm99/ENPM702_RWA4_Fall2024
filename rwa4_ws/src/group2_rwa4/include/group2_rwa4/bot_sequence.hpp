@@ -13,6 +13,12 @@ class BotSequence : public rclcpp::Node {
 
   void odometry_callback(const nav_msgs::msg::Odometry::SharedPtr msg);
   void control_callback();
+  void move(double linx,
+            double liny,
+            double linz,
+            double angx,
+            double angy,
+            double angz);
   void stop();
 
   rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_pub_;
