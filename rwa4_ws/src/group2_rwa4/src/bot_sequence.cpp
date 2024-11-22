@@ -168,20 +168,20 @@ void BotSequence::control_callback() {
   }
 }
 
-void BotSequence::move(double linx,
-                       double liny,
-                       double linz,
-                       double angx,
-                       double angy,
-                       double angz) {
+void BotSequence::move(double lin_x,
+                       double lin_y,
+                       double lin_z,
+                       double ang_x,
+                       double ang_y,
+                       double ang_z) {
   // Take in the request for moving the Robot and publish the command
   geometry_msgs::msg::Twist cmd_msg;
-  cmd_msg.angular.x = angx;
-  cmd_msg.angular.y = angy;
-  cmd_msg.angular.z = angz;
-  cmd_msg.linear.x = linx;
-  cmd_msg.linear.y = liny;
-  cmd_msg.linear.z = linz;
+  cmd_msg.linear.x = lin_x;
+  cmd_msg.linear.y = lin_y;
+  cmd_msg.linear.z = lin_z;
+  cmd_msg.angular.x = ang_x;
+  cmd_msg.angular.y = ang_y;
+  cmd_msg.angular.z = ang_z;
 
   // Publish the command
   cmd_pub_->publish(cmd_msg);
