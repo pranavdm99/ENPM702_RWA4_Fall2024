@@ -68,6 +68,7 @@ class BotSequence : public rclcpp::Node {
             double ang_x,
             double ang_y,
             double ang_z);
+
   /**
    * @brief This function calls calls the "move" function with all the speeds
    * set to zero
@@ -86,16 +87,22 @@ class BotSequence : public rclcpp::Node {
    *
    */
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_;
+
+  /**
+   * @brief This is the wall timer object responsible for managing the control
+   * sequence
+   *
+   */
   rclcpp::TimerBase::SharedPtr timer_;
 
   /**
-   * @brief Information regarding the action in progress
+   * @brief Information regarding the type of action in progress
    *
    */
   ActionFlag action_flag_;
 
   /**
-   * @brief The current step in the sequence
+   * @brief The current step in the sequence of instructions
    *
    */
   int current_step_;
@@ -107,7 +114,8 @@ class BotSequence : public rclcpp::Node {
   double target_distance_;
 
   /**
-   * @brief Current distance traveled in comparison with the target
+   * @brief Current distance traveled in comparison with the initial (x,y)
+   * position
    *
    */
   double traveled_distance_;
@@ -119,7 +127,7 @@ class BotSequence : public rclcpp::Node {
   double target_angle_;
 
   /**
-   * @brief Curret distance traveled in comparison with the target
+   * @brief Current angle rotated in comparison with the initial yaw angle
    *
    */
   double rotated_angle_;
@@ -146,7 +154,7 @@ class BotSequence : public rclcpp::Node {
   double initial_yaw_;
 
   /**
-   * @brief The current yaw angle of the Robot
+   * @brief The current yaw angle (Angle about Z axis) of the Robot
    *
    */
   double yaw_;
