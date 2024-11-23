@@ -4,6 +4,7 @@
 #include "tf2/LinearMath/Quaternion.h"
 
 BotSequence::BotSequence()
+    // Initialize attributes
     : Node("bot_sequence"),
       action_flag_(MOVE_FORWARD),
       current_step_(1),
@@ -44,7 +45,7 @@ void BotSequence::odometry_callback(
 
   // Calculate the displacement from the initial position. This is given by the
   // Euclidean distance
-  traveled_distance_ = std::sqrt(dx * dx + dy * dy);
+  traveled_distance_ = std::sqrt(std::pow(dx, 2) + std::pow(dy, 2));
 
   // Read the orientation of the Robot and compute the yaw
   tf2::Quaternion quaternion{
@@ -62,7 +63,7 @@ void BotSequence::control_callback() {
   // Based on the action flag and the current step, we determine the control
   // action
   switch (action_flag_) {
-    case MOVE_FORWARD:
+    case MOVE_FORWARD: {
       // The current action flag is MOVE_FORWARD, check if the Robot has
       // traveled the required distance
       if (traveled_distance_ >= target_distance_) {
@@ -82,7 +83,7 @@ void BotSequence::control_callback() {
                     traveled_distance_);
       }
       break;
-
+    }
     case ROTATE: {
       // The current action flag is ROTATE, compute the angle rotated and check
       // if the Robot has rotated by the required angle
@@ -97,32 +98,34 @@ void BotSequence::control_callback() {
         action_flag_ = STOP;  // Set the flag to STOP
         RCLCPP_INFO(this->get_logger(),
                     "Step %d finished: Rotated %.2f degrees clockwise",
-                    current_step_, target_angle_);
-
+                    current_step_, target_angle_ * 180.0 / M_PI);
       } else {
         // The Robot has not reached the target orientation, keep publishing the
         // command to rotate the Robot clockwise at constant angular velocity
         move(0.0, 0.0, 0.0, 0.0, 0.0, -0.1);
-        RCLCPP_INFO(this->get_logger(), "Angle rotated: %.2f", angle_rotated);
+        RCLCPP_INFO(this->get_logger(), "Angle rotated: %.2f",
+                    angle_rotated * 180 / M_PI);
       }
       break;
     }
-
-    case STOP:
+    case STOP: {
       // The current action flag is STOP, so check for the next step in the
       // sequence
       switch (current_step_) {
-        case 1:  // Completed moving 10 meters
+        case 1: {
+          // Completed moving 10 meters
           // Set the action flag to Rotate and set the target angle to 90
           // degrees. Read the current yaw angle and update the initial yaw,
           // update the current step
           action_flag_ = ROTATE;
-          target_angle_ = 90.0 * M_PI / 180.0;
+          target_angle_ = M_PI_2;
           initial_yaw_ = yaw_;
           current_step_ = 2;
           break;
+        }
 
-        case 2:  // Completed rotating 90 degrees
+        case 2: {
+          // Completed rotating 90 degrees
           // Set the action flag to Move Forward and set the target distance to
           // 5 m. Read the current x,y position and update the initial x, y
           // positions, update the current step
@@ -133,18 +136,20 @@ void BotSequence::control_callback() {
           initial_y_ = latest_position_.y;
           current_step_ = 3;
           break;
-
-        case 3:  // Completed moving 5 meters
+        }
+        case 3: {
+          // Completed moving 5 meters
           // Set the action flag to Rotate and set the target angle to 45
           // degrees. Read the current yaw angle and update the initial yaw,
           // update the current step
           action_flag_ = ROTATE;
-          target_angle_ = 45.0 * M_PI / 180.0;
+          target_angle_ = M_PI_4;
           initial_yaw_ = yaw_;
           current_step_ = 4;
           break;
-
-        case 4:  // Completed rotating 45 degrees
+        }
+        case 4: {
+          // Completed rotating 45 degrees
           // Set the action flag to Move forward and set the target distance to
           // 10 m. Read the current x,y position and update the initial x,y
           // positions, update the current step
@@ -155,16 +160,34 @@ void BotSequence::control_callback() {
           initial_y_ = latest_position_.y;
           current_step_ = 5;
           break;
+        }
 
-        case 5:  // Completed final movement
+        case 5: {
+          // Completed final movement
           // This indicates that the full sequence of movement is complete, shut
           // down the node
           RCLCPP_INFO(this->get_logger(),
                       "All tasks completed. Shutting down...");
           rclcpp::shutdown();  // Shut down the program
           break;
+        }
+        default: {
+          // Ideally this should never happen, adding the below code as safety
+          // net
+          RCLCPP_WARN(this->get_logger(), "Unknown case");
+          rclcpp::shutdown();
+          break;
+        }
       }
       break;
+    }
+
+    default: {
+      // Ideally this should never happen, adding the below code as a safety net
+      RCLCPP_WARN(this->get_logger(), "Unknown action flag");
+      rclcpp::shutdown();
+      break;
+    }
   }
 }
 
